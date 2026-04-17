@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Library Fine System</title>
+    <meta name="description" content="Manage books, members, loans and fines for your library — all in one place." />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- TOP BAR -->
+    <header class="top-bar">
+        <div class="logo-icon">📚</div>
+        <h1>Library Fine System</h1>
+        <span class="badge">v1.0 — Spring Boot</span>
+    </header>
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="nav-item active" data-page="dashboard">
+            <span class="icon">🏠</span> Dashboard
+        </div>
+        <div class="nav-item" data-page="books">
+            <span class="icon">📖</span> Books
+        </div>
+        <div class="nav-item" data-page="members">
+            <span class="icon">👥</span> Members
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="nav-item" data-page="loans">
+            <span class="icon">🔄</span> Loans
+        </div>
+        <div class="nav-item" data-page="fines">
+            <span class="icon">💰</span> Fines
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- ======================================================
+             DASHBOARD PAGE
+             ====================================================== -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div>
+                    <h2>Dashboard</h2>
+                    <p>Overview of your library system</p>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="refreshAll()">↻ Refresh</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📖</div>
+                    <div class="stat-value" id="stat-books">—</div>
+                    <div class="stat-label">Total Books</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="stat-members">—</div>
+                    <div class="stat-label">Members</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔄</div>
+                    <div class="stat-value" id="stat-active-loans">—</div>
+                    <div class="stat-label">Active Loans</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-value" id="stat-overdue">—</div>
+                    <div class="stat-label">Overdue Loans</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value" id="stat-fines">—</div>
+                    <div class="stat-label">Total Pending Fines</div>
+                </div>
+            </div>
+
+            <!-- Recent Loans -->
+            <div class="card">
+                <div class="card-title">🕐 Recent Loans</div>
+                <div class="table-wrapper">
+                    <table id="dash-loans-table">
+                        <thead><tr>
+                            <th>Book</th>
+                            <th>Member</th>
+                            <th>Issued</th>
+                            <th>Due</th>
+                            <th>Status</th>
+                            <th>Fine</th>
+                        </tr></thead>
+                        <tbody id="dash-loans-body">
+                            <tr><td colspan="6" class="empty-state"><p>Loading…</p></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================
+             BOOKS PAGE
+             ====================================================== -->
+        <div class="page" id="page-books">
+            <div class="page-header">
+                <div><h2>Books</h2><p>Manage library catalogue</p></div>
+            </div>
+
+            <!-- Add Book Form -->
+            <div class="card">
+                <div class="card-title">➕ Add New Book</div>
+                <div class="form-grid" id="add-book-form">
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" id="book-title" placeholder="e.g. Clean Code" />
+                    </div>
+                    <div class="form-group">
+                        <label>Author *</label>
+                        <input type="text" id="book-author" placeholder="e.g. Robert C. Martin" />
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <input type="text" id="book-category" placeholder="e.g. Programming" />
+                    </div>
+                    <div class="form-group">
+                        <label>Total Copies *</label>
+                        <input type="number" id="book-copies" placeholder="e.g. 3" min="1" />
+                    </div>
+                </div>
+                <div style="margin-top:16px;">
+                    <button class="btn btn-primary" onclick="addBook()">📖 Add Book</button>
+                </div>
+            </div>
+
+            <!-- Filter + Table -->
+            <div class="card">
+                <div class="card-title">📚 Book Catalogue</div>
+                <div class="filter-bar" style="margin-bottom:14px;">
+                    <input type="text" id="filter-category" placeholder="Filter by category…" oninput="filterBooks()" />
+                    <button class="btn btn-outline btn-sm" onclick="loadBooks()">↻ Refresh</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Category</th>
+                            <th>Availability</th>
+                        </tr></thead>
+                        <tbody id="books-body">
+                            <tr><td colspan="5"><div class="empty-state"><div class="icon">📭</div><p>No books loaded yet.</p></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================
+             MEMBERS PAGE
+             ====================================================== -->
+        <div class="page" id="page-members">
+            <div class="page-header">
+                <div><h2>Members</h2><p>Register and manage library members</p></div>
+            </div>
+
+            <!-- Register Member -->
+            <div class="card">
+                <div class="card-title">➕ Register New Member</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="member-name" placeholder="e.g. Alice Johnson" />
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="member-email" placeholder="e.g. alice@example.com" />
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="text" id="member-phone" placeholder="e.g. 9876543210" />
+                    </div>
+                </div>
+                <div style="margin-top:16px;">
+                    <button class="btn btn-primary" onclick="registerMember()">👤 Register Member</button>
+                </div>
+            </div>
+
+            <!-- Members Table -->
+            <div class="card">
+                <div class="card-title">👥 All Members</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Pending Fines</th>
+                            <th>Actions</th>
+                        </tr></thead>
+                        <tbody id="members-body">
+                            <tr><td colspan="6"><div class="empty-state"><div class="icon">👤</div><p>No members loaded yet.</p></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================
+             LOANS PAGE
+             ====================================================== -->
+        <div class="page" id="page-loans">
+            <div class="page-header">
+                <div><h2>Loans</h2><p>Borrow and return books</p></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:16px;">
+                <!-- Borrow -->
+                <div class="card">
+                    <div class="card-title">📤 Borrow a Book</div>
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label>Book ID</label>
+                        <input type="number" id="borrow-bookid" placeholder="Enter Book ID" min="1" />
+                    </div>
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label>Member ID</label>
+                        <input type="number" id="borrow-memberid" placeholder="Enter Member ID" min="1" />
+                    </div>
+                    <button class="btn btn-primary" onclick="borrowBook()">📤 Borrow</button>
+                </div>
+
+                <!-- Return -->
+                <div class="card">
+                    <div class="card-title">📥 Return a Book</div>
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label>Loan ID</label>
+                        <input type="number" id="return-loanid" placeholder="Enter Loan ID" min="1" />
+                    </div>
+                    <button class="btn btn-success" onclick="returnBook()">📥 Return</button>
+                    <div style="margin-top:12px;">
+                        <button class="btn btn-outline btn-sm" onclick="updateOverdue()">⚠️ Sync Overdue Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Loans Table -->
+            <div class="card">
+                <div class="card-title">🔄 Active & Overdue Loans</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr>
+                            <th>Loan ID</th>
+                            <th>Book</th>
+                            <th>Member</th>
+                            <th>Issued</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                        </tr></thead>
+                        <tbody id="loans-body">
+                            <tr><td colspan="6"><div class="empty-state"><div class="icon">🔄</div><p>No loans loaded yet.</p></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================
+             FINES PAGE
+             ====================================================== -->
+        <div class="page" id="page-fines">
+            <div class="page-header">
+                <div><h2>Fines</h2><p>Track and pay overdue fines — $1.00 per day overdue</p></div>
+            </div>
+
+            <!-- Loan History with fines -->
+            <div class="card">
+                <div class="card-title">📋 Full Loan History</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr>
+                            <th>Loan ID</th>
+                            <th>Book</th>
+                            <th>Member</th>
+                            <th>Due Date</th>
+                            <th>Returned On</th>
+                            <th>Status</th>
+                            <th>Fine</th>
+                        </tr></thead>
+                        <tbody id="history-body">
+                            <tr><td colspan="7"><div class="empty-state"><div class="icon">📋</div><p>No history yet.</p></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Members with fines -->
+            <div class="card">
+                <div class="card-title">💰 Members with Pending Fines</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Pending Fine</th>
+                            <th>Action</th>
+                        </tr></thead>
+                        <tbody id="fines-members-body">
+                            <tr><td colspan="5"><div class="empty-state"><div class="icon">✅</div><p>No pending fines.</p></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main><!-- /.main-content -->
+</div><!-- /.app-layout -->
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

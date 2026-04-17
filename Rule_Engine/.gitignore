@@ -1,0 +1,18 @@
+target/
+*.class
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Eclipse
+.project
+.settings/
+.classpath
+
+# VS Code
+.vscode/
+
+# Build and Logs
+*.log
